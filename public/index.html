@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CaveMines</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Header with profile and wallet -->
+  <header class="header">
+    <div class="profile">
+      <img src="https://www.svgrepo.com/show/382106/avatar-default.svg" class="avatar" />
+      <span id="playerName">Guest</span>
+    </div>
+    <div class="wallet">
+      💰 Balance: <span id="balance">1000.00</span> Rs
+    </div>
+  </header>
+
+  <!-- Main Game Area -->
+  <main class="game-container">
+    <!-- Left section (game) -->
+    <section class="game-left">
+
+      <!-- Grid / Game Board -->
+      <div id="gameGrid" class="grid"></div>
+
+      <!-- Stats Display -->
+      <div class="stats">
+        <p><strong>Multiplier:</strong> <span id="multiplier">x1.00</span></p>
+        <p><strong>Win Amount:</strong> <span id="winAmount">0.00</span> Rs</p>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls">
+
+        <!-- Trap control -->
+        <div class="control-group">
+          <label>Traps:</label>
+          <button onclick="changeTraps(-1)">-</button>
+          <input type="number" id="trapsCount" value="3" min="1" max="24" readonly />
+          <button onclick="changeTraps(1)">+</button>
+        </div>
+
+        <!-- Bet control -->
+        <div class="control-group">
+          <label>Bet:</label>
+          <button onclick="changeBet(-50)">-</button>
+          <input type="number" id="betAmount" value="250" min="50" step="50" />
+          <button onclick="changeBet(50)">+</button>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="action-buttons">
+          <button id="playBtn">Play</button>
+          <button id="cashoutBtn">Cash Out</button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Right section (Leaderboard) -->
+    <aside class="leaderboard">
+      <h2>CAVEMINES</h2>
+      <div class="tabs">
+        <button class="active">Live</button>
+        <button>My</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Player</th>
+            <th>Bet</th>
+            <th>Coef</th>
+            <th>Win</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboardTable">
+          <!-- JS adds rows -->
+        </tbody>
+      </table>
+    </aside>
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    function changeTraps(delta) {
+      const input = document.getElementById('trapsCount');
+      let val = parseInt(input.value);
+      val = Math.min(24, Math.max(1, val + delta));
+      input.value = val;
+    }
+
+    function changeBet(delta) {
+      const input = document.getElementById('betAmount');
+      let val = parseInt(input.value);
+      val = Math.max(50, val + delta);
+      input.value = val;
+    }
+  </script>
+  <script>
+  async function loadUser() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/login.html';
+      return;
+    }
+    const res = await fetch('/api/auth/me', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const user = await res.json();
+    document.getElementById('playerName').textContent = user.name;
+    document.getElementById('balance').textContent = `${user.balance.toFixed(2)}`;
+  }
+  loadUser();
+</script>
+<span id="wallet">Balance: Loading...</span>
+
+<script>
+  async function loadWallet() {
+    const res = await fetch("/api/auth/wallet", {
+      headers: getAuthHeaders(),
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      document.getElementById("wallet").textContent = `Balance: ${data.balance} Rs`;
+    } else {
+      document.getElementById("wallet").textContent = "Balance: Error";
+    }
+  }
+
+  loadWallet();
+</script>
+
+</body>
+</html>
